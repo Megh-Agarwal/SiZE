@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>SiZE</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+        <link rel="stylesheet" href="css/all.min.css" />
+		<link rel="stylesheet" href="css/materialize.min.css" />
+		<link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+            <div class="container center-align text-white">
+                <h3>S <i class="fas fa-images"></i> ZE</h3>
+                <p class="text-white">Please choose an image</p>
+                <form id="image-form">
+                    <div class="file-field input-field">
+                        <div>
+                            <input type="file" id="img" />
+                        </div>
+    
+                        <div class="file-path-wrapper">
+                            <input
+                                class="file-path validate"
+                                type="text"
+                                placeholder="Upload file"
+                            />
+                        </div>
+                    </div>
+    
+                    <p class="text-white">
+                        <strong>Note:</strong>
+                        <em>If you lower the size significantly, the quality will reduce.</em>
+                    </p>
+                    <p class="range-field">
+                        <input type="range" id="slider" min="0" max="100" />
+                    </p>
+    
+                    <input type="submit" class="btn" value="Resize" />
+                </form>
+    
+                <div class="card output text-black">
+                    <div class="card-content">
+                        The output path on your computer: <span id="output-path"></span>
+                    </div>
+                </div>
+            </div>
+    
+            <script src="js/materialize.min.js"></script>
+            <script>
+                const path = require('path');
+                const os = require('os');
+                const {ipcRenderer} = require('electron');
+
+                const form = document.getElementById('image-form');
+                const slider = document.getElementById('slider');
+                const img = document.getElementById('img');
+
+                document.getElementById('output-path').innerText = path.join(os.homedir() , 'imageshrink');
+
+                //on submit
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const imgPath = img.files[0].path;
+                    const quality = slider.value;
+
+                    ipcRenderer.send('image:minimize', {
+                        imgPath, quality
+                    })
+                    console.log(imgPath, quality);
+                })
+
+                ipcRenderer.on('image:done', () => {
+                    M.toast({
+                        html: `The Image resized to ${slider.value}% quality!!`
+                    })
+                })
+            </script>
+        </body>
+</html>
